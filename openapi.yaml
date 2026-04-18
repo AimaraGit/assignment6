@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+  title: Simple Auth API
+  version: 1.0.0
+  description: REST API for user authentication — login, registration, and password reset.
+
+paths:
+  #POST/login
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user with username and password. Returns a JWT token on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: john_doe
+                password:
+                  type: string
+                  format: password
+                  example: MySecret123
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  message:
+                    type: string
+                    example: Login successful
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid username or password
+
+  #POST/register
+  /register:
+    post:
+      summary: Register a new user
+      description: Creates a new user account. Returns the created user's ID on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  example: john_doe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  format: password
+                  example: MySecret123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+                  message:
+                    type: string
+                    example: Registration successful
+        '400':
+          description: Validation error (e.g. missing fields or invalid email)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email already in use
+        '409':
+          description: Username or email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Username already taken
+
+  #POST/reset-password
+  /reset-password:
+    post:
+      summary: Request a password reset
+      description: >
+        Sends a password-reset link to the user's registered email address.
+        For security, the response is always 200 whether or not the email exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+      responses:
+        '200':
+          description: Reset email sent (or silently ignored if email not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: If this email exists, a reset link has been sent
+        '400':
+          description: Invalid or missing email format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid email addresss
